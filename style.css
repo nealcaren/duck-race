@@ -78,7 +78,7 @@ h1 {
 .river-bank {
     position: absolute;
     height: 100%;
-    width: 100%;
+    width: 3000px; /* Match the race area width */
     z-index: 5;
     pointer-events: none;
 }
@@ -106,7 +106,7 @@ h1 {
 /* Add some vegetation to the banks */
 .vegetation {
     position: absolute;
-    width: 100%;
+    width: 3000px; /* Match the race area width */
     height: 20px;
     z-index: 6;
 }
@@ -132,7 +132,7 @@ h1 {
 }
 
 #race-area {
-    width: 100%;
+    width: 3000px; /* Make this wider than the race length to ensure water extends */
     height: 100%;
     position: relative;
     overflow: hidden;
