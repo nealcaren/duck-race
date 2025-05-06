@@ -16,12 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const VIEWPORT_WIDTH = 1000; // Approximate viewport width
 
     // --- SOUNDS ---
-    // Create dummy audio objects that won't cause errors
+    // Real audio objects for race sounds
     const SOUNDS = {
-        start: { play: () => console.log("Start sound would play") },
+        start: new Audio("sounds/and-they-are-off.mp3"),
         quack: { play: () => console.log("Quack sound would play") },
         cheer: { play: () => console.log("Cheer sound would play") }
     };
+    
+    // Set volume for the start sound
+    SOUNDS.start.volume = 0.5;
 
 
     // --- ANNOUNCER LINES ---
@@ -569,7 +572,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function playSound(sound) {
         if (!sound) return;
         try {
-            sound.play();
+            // If it's an Audio object with a play method
+            if (sound instanceof Audio) {
+                sound.currentTime = 0; // Reset to start of audio
+                sound.play().catch(e => console.warn("Audio play failed:", e.message));
+            } else {
+                // For our dummy sound objects
+                sound.play();
+            }
         } catch (e) {
             console.warn("Sound play failed:", e.message);
         }
