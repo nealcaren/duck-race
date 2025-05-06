@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             duck.currentYOffset = (Math.random() - 0.5) * 10; 
             duck.elementContainer.style.left = `${duck.currentPosition}px`;
             duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px)`;
+            duck.elementContainer.classList.add('middle-pack'); // Start all ducks in middle pack style
             
             trackLaneDiv.appendChild(duckContainer);
             raceArea.appendChild(trackLaneDiv);
@@ -179,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let winnerHasCrossed = false;
 
+        // Update duck positions
         ducks.forEach(duck => {
             if (duck.currentPosition >= logicalFinishLinePosition) {
                 if (duck.id === actualWinner.id) {
@@ -205,7 +207,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const displayX = Math.min(duck.currentPosition, logicalFinishLinePosition + 30);
             duck.elementContainer.style.left = `${displayX}px`;
-            duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px)`;
+        });
+        
+        // Sort ducks by position to determine race order
+        const sortedDucks = [...ducks].sort((a, b) => b.currentPosition - a.currentPosition);
+        
+        // Apply different animation styles based on race position
+        sortedDucks.forEach((duck, index) => {
+            // Remove all position classes first
+            duck.elementContainer.classList.remove('front-runner', 'close-behind', 'middle-pack', 'struggling');
+            
+            // Apply appropriate class based on position
+            if (index === 0) {
+                duck.elementContainer.classList.add('front-runner');
+            } else if (index === 1 && (sortedDucks[0].currentPosition - duck.currentPosition) < 50) {
+                duck.elementContainer.classList.add('close-behind');
+            } else if (index >= sortedDucks.length - 2) {
+                duck.elementContainer.classList.add('struggling');
+            } else {
+                duck.elementContainer.classList.add('middle-pack');
+            }
         });
 
         if (timestamp - lastAnnounceTime > announceInterval) {
@@ -243,8 +264,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (actualWinner.currentPosition >= logicalFinishLinePosition) {
             actualWinner.currentPosition = logicalFinishLinePosition + 5; 
             actualWinner.elementContainer.style.left = `${actualWinner.currentPosition}px`;
-            actualWinner.elementContainer.style.transform = `translateY(${actualWinner.currentYOffset}px)`;
+            
+            // Remove all animation classes and add winner highlight
+            actualWinner.elementContainer.classList.remove('front-runner', 'close-behind', 'middle-pack', 'struggling');
             actualWinner.elementContainer.classList.add('winner-highlight');
+            
+            // Add a victory animation
+            actualWinner.elementContainer.style.animation = 'none';
+            setTimeout(() => {
+                actualWinner.elementContainer.style.animation = 'frontRunnerBobbing 0.6s ease-in-out infinite alternate';
+            }, 50);
             
             announcer.innerHTML = getRandomAnnouncerLine('winner', { winnerName: actualWinner.name });
             playSound(SOUNDS.cheer);

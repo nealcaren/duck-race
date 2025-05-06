@@ -97,8 +97,7 @@ h1 {
     top: 5px; /* Starting Y within lane */
     width: 60px; /* Width for duck SVG */
     height: 60px; /* Height for duck SVG */
-    transition: transform 0.1s linear;
-    animation: duckBobbing 1s ease-in-out infinite alternate;
+    transition: transform 0.1s linear, left 0.1s linear;
 }
 
 .duck-racer-container svg {
@@ -106,9 +105,47 @@ h1 {
     height: 100%;
 }
 
+/* Different bobbing animations based on race position */
 @keyframes duckBobbing {
     0% { transform: translateY(0px); }
     100% { transform: translateY(-8px); } /* Bob up */
+}
+
+@keyframes frontRunnerBobbing {
+    0% { transform: translateY(0px) rotate(-5deg); }
+    100% { transform: translateY(-10px) rotate(5deg); } /* More dramatic bob with tilt */
+}
+
+@keyframes closeBehindBobbing {
+    0% { transform: translateY(0px) rotate(3deg); }
+    100% { transform: translateY(-9px) rotate(-3deg); } /* Eager bob with opposite tilt */
+}
+
+@keyframes strugglingBobbing {
+    0% { transform: translateY(2px) rotate(-2deg); }
+    50% { transform: translateY(-4px) rotate(2deg); }
+    100% { transform: translateY(0px) rotate(-1deg); } /* Irregular, struggling motion */
+}
+
+/* Race position classes */
+.front-runner {
+    animation: frontRunnerBobbing 0.8s ease-in-out infinite alternate;
+    z-index: 10; /* Ensure front runner is visually on top */
+}
+
+.close-behind {
+    animation: closeBehindBobbing 0.9s ease-in-out infinite alternate;
+    z-index: 9;
+}
+
+.middle-pack {
+    animation: duckBobbing 1s ease-in-out infinite alternate;
+    z-index: 8;
+}
+
+.struggling {
+    animation: strugglingBobbing 1.2s ease-in-out infinite;
+    z-index: 7;
 }
 
 
