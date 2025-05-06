@@ -66,19 +66,42 @@ h1 {
     max-width: 1000px;
     margin: 20px auto;
     position: relative;
-    height: 480px; /* Adjust based on number of ducks + bobbing */
+    height: 480px; /* Height for 6 ducks with room for bobbing */
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     border: 5px solid #1e88e5; /* Darker blue border */
-    /* Animated River Background */
-    background: linear-gradient(135deg, #3498db 25%, #2980b9 25%, #2980b9 50%, #3498db 50%, #3498db 75%, #2980b9 75%, #2980b9 100%);
-    background-size: 40px 40px; /* Size of the pattern */
-    animation: animatedRiver 3s linear infinite;
+    /* More realistic river background with multiple layers */
+    background: 
+        /* Small ripples layer */
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 3px) 0 0 / 20px 20px,
+        /* Medium ripples layer */
+        radial-gradient(circle at 30% 70%, rgba(255,255,255,0.15) 2px, transparent 4px) 0 0 / 30px 30px,
+        /* Flow lines layer */
+        linear-gradient(90deg, 
+            rgba(255,255,255,0.07) 1px, 
+            transparent 2px, 
+            transparent 10px) 0 0 / 15px 100%,
+        /* Base water color with gradient for depth */
+        linear-gradient(180deg, #2980b9, #3498db 30%, #2980b9 70%, #1e6091);
+    animation: 
+        animateRipples1 4s linear infinite,
+        animateRipples2 6s linear infinite,
+        animateFlow 2s linear infinite;
 }
 
-@keyframes animatedRiver {
-    0% { background-position: 0 0; }
-    100% { background-position: 40px 0; }
+@keyframes animateRipples1 {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 20px 20px, 0 0, 0 0, 0 0; }
+}
+
+@keyframes animateRipples2 {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 0 0, 30px 10px, 0 0, 0 0; }
+}
+
+@keyframes animateFlow {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 0 0, 0 0, 15px 0, 0 0; }
 }
 
 
@@ -86,9 +109,25 @@ h1 {
     position: relative;
     height: 75px; /* Space for each duck + bobbing room */
     border-bottom: 1px dashed rgba(255,255,255,0.3);
+    /* Add subtle lane current effect */
+    background: linear-gradient(90deg, 
+        rgba(255,255,255,0.03), 
+        rgba(255,255,255,0.08) 20%, 
+        rgba(255,255,255,0.03) 40%, 
+        rgba(255,255,255,0.08) 60%, 
+        rgba(255,255,255,0.03) 80%, 
+        rgba(255,255,255,0.08));
+    background-size: 100px 100%;
+    animation: laneCurrent 8s linear infinite;
 }
+
 .track-lane:last-child {
     border-bottom: none;
+}
+
+@keyframes laneCurrent {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 0; }
 }
 
 .duck-racer-container { /* For positioning and bobbing */
@@ -158,6 +197,22 @@ h1 {
     background-color: red;
     border: 2px dashed yellow;
     z-index: 10;
+    /* Add floating buoys effect */
+    box-shadow: 
+        0 0 0 3px rgba(255, 255, 255, 0.3),
+        0 75px 0 -1px #ff6b6b, 
+        0 150px 0 -1px #ff6b6b, 
+        0 225px 0 -1px #ff6b6b, 
+        0 300px 0 -1px #ff6b6b, 
+        0 375px 0 -1px #ff6b6b, 
+        0 450px 0 -1px #ff6b6b;
+    /* Add subtle animation to buoys */
+    animation: buoyBobbing 3s ease-in-out infinite;
+}
+
+@keyframes buoyBobbing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
 }
 
 #controls {
@@ -210,10 +265,22 @@ h1 {
 }
 .winner-highlight {
     box-shadow: 0 0 15px 5px gold;
-    /* You might want to apply highlight to the SVG parent or the SVG itself */
-    /* e.g., .winner-highlight svg { filter: drop-shadow(0 0 5px gold); } */
     border-radius: 50%; /* If applied to the container */
-}.duck-racer-container {
+    /* Add celebratory confetti effect */
+    background-image: 
+        radial-gradient(circle, transparent 30%, rgba(255,215,0,0.2) 30%),
+        radial-gradient(circle at 30% 20%, transparent 40%, rgba(255,105,180,0.15) 40%),
+        radial-gradient(circle at 70% 60%, transparent 35%, rgba(50,205,50,0.15) 35%);
+    background-size: 20px 20px, 30px 30px, 25px 25px;
+    animation: confettiSpin 3s linear infinite;
+}
+
+@keyframes confettiSpin {
+    0% { background-position: 0 0, 0 0, 0 0; }
+    100% { background-position: 20px 20px, 30px 30px, 25px 25px; }
+}
+
+.duck-racer-container {
     position: absolute;
     width: 50px;
     height: 45px;
