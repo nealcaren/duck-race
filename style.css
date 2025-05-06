@@ -274,22 +274,23 @@ h1 {
         0 450px 0 -1px #ff6b6b;
     /* Add subtle animation to buoys */
     animation: buoyBobbing 3s ease-in-out infinite;
-    /* Add a checkered flag at the top */
-    &::before {
-        content: "";
-        position: absolute;
-        top: -30px;
-        left: -15px;
-        width: 30px;
-        height: 30px;
-        background: 
-            linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black 75%, black),
-            linear-gradient(45deg, black 25%, white 25%, white 75%, black 75%, black);
-        background-size: 10px 10px;
-        background-position: 0 0, 5px 5px;
-        transform: rotate(5deg);
-        box-shadow: 0 0 5px rgba(0,0,0,0.5);
-    }
+}
+
+/* Add checkered flag */
+#finish-line::before {
+    content: "";
+    position: absolute;
+    top: -30px;
+    left: -15px;
+    width: 30px;
+    height: 30px;
+    background: 
+        linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black 75%, black),
+        linear-gradient(45deg, black 25%, white 25%, white 75%, black 75%, black);
+    background-size: 10px 10px;
+    background-position: 0 0, 5px 5px;
+    transform: rotate(5deg);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
 @keyframes buoyBobbing {
