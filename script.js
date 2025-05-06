@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
           "The ducks are lining up! Who's your champion?",
           "Odds are on the board! Get your wagers in!",
           "Feathers will fly! Or... float, rather. Bet now!",
-          // new
           "Remember: the early bird gets the worm, but the early duck gets the W!",
           "If you’re feeling lucky, wadd-le you waiting for?",
           "Grab your popcorn—this show will be a real feather in your cap!",
@@ -40,12 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
       
         start: [
-          // original
           "And they're OFF! A flurry of feathers and fury!",
           "The race has begun! May the best duck win!",
           "They're in the water! What a quack-tacular start!",
           "Go, ducks, go! The crowd is roaring!",
-          // new
           "It’s paddle‑to‑the‑metal time—no fowl play allowed!",
           "Cue the suspense music: it’s about to get bill‑serious!",
           "Blink and you'll miss it—these ducks are faster than a dad joke at Thanksgiving!",
@@ -63,8 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "{randomDuck2} seems to be struggling against the current!",
             "What a move by {randomDuck3}! Cutting through the water!",
             "The lead has changed THREE TIMES in the last few seconds!",
-            "I've never seen a duck race this unpredictable!"
-          // new
+            "I've never seen a duck race this unpredictable!",
           "{leadingDuck} just said, ‘Water you all doing back there?’",
           "If enthusiasm were bread, {randomDuck1} would be a quacker‑jack!",
           "Rumor has it {randomDuck2} switched to decaf—explain the slow paddling?",
@@ -75,11 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
       
         comeback: [
-          // original
           "Where did THAT come from?! {comebackDuck} is surging!",
           "The crowd is going wild as {comebackDuck} makes a push!",
           "Don't count out {comebackDuck}! What a recovery!",
-          // new
           "Holy quack‑amole! {comebackDuck} is on a tear!",
           "From zero to hero: {comebackDuck} just upgraded to turbo‑paddle!",
           "Mom always said, ‘Put your bill to the grindstone’—{comebackDuck} listened!"
