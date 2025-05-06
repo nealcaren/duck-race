@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Dramatic slowdown chances are higher for early leaders
                 const slowdownChance = raceProgress > 0.6 && duck.currentPosition > logicalFinishLinePosition * 0.25 ? 0.12 : 0.03;
                 
-                // Winner gets a slight advantage, but not overwhelming
+                // Winner gets a more significant advantage as the race progresses
                 if (duck.id === actualWinner.id) {
                     // Winner advantage varies throughout the race
                     if (raceProgress < 0.3) {
@@ -248,10 +248,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         movement += (Math.random() * 0.3);
                     } else if (raceProgress > 0.7) {
                         // Final stretch: winner gets more advantage
-                        movement += (0.3 + Math.random() * 0.5);
+                        movement += (0.5 + Math.random() * 0.8);
+                        
+                        // Extra boost if other ducks are getting close to finish
+                        const otherDucksNearFinish = ducks.some(d => 
+                            d.id !== actualWinner.id && 
+                            d.currentPosition > logicalFinishLinePosition - 50);
+                            
+                        if (otherDucksNearFinish) {
+                            movement += 1.5;
+                        }
                     } else {
                         // Middle race: moderate advantage
-                        movement += (Math.random() * 0.5);
+                        movement += (0.2 + Math.random() * 0.6);
                     }
                 }
                 
@@ -364,32 +373,51 @@ document.addEventListener('DOMContentLoaded', () => {
             lastAnnounceTime = timestamp;
         }
 
-        if (actualWinner.currentPosition >= logicalFinishLinePosition) {
-            actualWinner.currentPosition = logicalFinishLinePosition + 5; 
-            actualWinner.elementContainer.style.left = `${actualWinner.currentPosition}px`;
-            
-            // Remove all animation classes and add winner highlight
-            actualWinner.elementContainer.classList.remove('front-runner', 'close-behind', 'middle-pack', 'struggling');
-            actualWinner.elementContainer.classList.add('winner-highlight');
-            
-            // Add a victory animation
-            actualWinner.elementContainer.style.animation = 'none';
-            setTimeout(() => {
-                actualWinner.elementContainer.style.animation = 'frontRunnerBobbing 0.6s ease-in-out infinite alternate';
-            }, 50);
-            
-            announcer.innerHTML = getRandomAnnouncerLine('winner', { winnerName: actualWinner.name });
-            playSound(SOUNDS.cheer);
-            
-            raceInProgress = false;
-            startButton.style.display = 'none';
-            nextRaceButton.style.display = 'inline-block';
-            nextRaceButton.disabled = false; 
+        // Check if any duck has crossed the finish line
+        const finishedDucks = ducks.filter(duck => duck.currentPosition >= logicalFinishLinePosition);
+        
+        if (finishedDucks.length > 0) {
+            // If the actual winner has crossed, end the race with them as winner
+            if (actualWinner.currentPosition >= logicalFinishLinePosition) {
+                endRace(actualWinner);
+            } 
+            // If other ducks crossed but not the winner, slow them down at the finish line
+            else {
+                finishedDucks.forEach(duck => {
+                    // Pull back ducks that crossed too early
+                    duck.currentPosition = logicalFinishLinePosition - 5;
+                    duck.elementContainer.style.left = `${duck.currentPosition}px`;
+                });
+                animationFrameId = requestAnimationFrame((ts) => animateRace(ts, actualWinner));
+            }
         } else {
             animationFrameId = requestAnimationFrame((ts) => animateRace(ts, actualWinner));
         }
     }
 
+    function endRace(winner) {
+        winner.currentPosition = logicalFinishLinePosition + 5; 
+        winner.elementContainer.style.left = `${winner.currentPosition}px`;
+        
+        // Remove all animation classes and add winner highlight
+        winner.elementContainer.classList.remove('front-runner', 'close-behind', 'middle-pack', 'struggling');
+        winner.elementContainer.classList.add('winner-highlight');
+        
+        // Add a victory animation
+        winner.elementContainer.style.animation = 'none';
+        setTimeout(() => {
+            winner.elementContainer.style.animation = 'frontRunnerBobbing 0.6s ease-in-out infinite alternate';
+        }, 50);
+        
+        announcer.innerHTML = getRandomAnnouncerLine('winner', { winnerName: winner.name });
+        playSound(SOUNDS.cheer);
+        
+        raceInProgress = false;
+        startButton.style.display = 'none';
+        nextRaceButton.style.display = 'inline-block';
+        nextRaceButton.disabled = false;
+    }
+    
     function playSound(sound) {
         if (!sound) return;
         try {
