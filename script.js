@@ -43,20 +43,43 @@ document.addEventListener('DOMContentLoaded', () => {
             "Look at {randomDuck2} go! What a surge!",
             "The current seems to favor {leadingDuck} right now!",
             "Oh! {randomDuck3} hit a bit of rough water!",
-            "Still anyone's race, folks! Don't blink!"
+            "Still anyone's race, folks! Don't blink!",
+            "WHOA! {randomDuck1} just found an extra gear!",
+            "{randomDuck2} seems to be struggling against the current!",
+            "The pack is bunching up! This is getting intense!",
+            "What a move by {randomDuck3}! Cutting through the water!",
+            "The lead has changed THREE TIMES in the last few seconds!",
+            "I've never seen a duck race this unpredictable!"
+        ],
+        comeback: [
+            "INCREDIBLE! {comebackDuck} is making a dramatic move from behind!",
+            "Where did THAT come from?! {comebackDuck} is surging!",
+            "The crowd is going wild as {comebackDuck} makes a push!",
+            "Don't count out {comebackDuck}! What a recovery!"
+        ],
+        upset: [
+            "This could be a major upset if {upsetDuck} maintains this pace!",
+            "Nobody saw {upsetDuck} as a contender, but look at them now!",
+            "The underdog {upsetDuck} is showing everyone how it's done!"
         ],
         nearFinish: [
             "Down the final stretch they come!",
             "{leadingDuck} is pulling ahead!",
             "It's neck and neck between {randomDuck1} and {randomDuck2} for second!",
             "The finish line is in sight! This is it!",
-            "Can {trailingDuck} make a last-minute comeback?"
+            "Can {trailingDuck} make a last-minute comeback?",
+            "Photo finish coming up! I can't tell who's ahead!",
+            "They're beak to beak with just meters to go!",
+            "The crowd is on their feet! What a finish we're about to see!"
         ],
         winner: [
             "🎉 And the winner is... **{winnerName}**! Unbelievable!",
             "🎉 **{winnerName}** takes the crown! What a race!",
             "🎉 By a beak! It's **{winnerName}** for the win!",
-            "🎉 Let's hear it for our champion, **{winnerName}**!"
+            "🎉 Let's hear it for our champion, **{winnerName}**!",
+            "🎉 In a stunning finish, **{winnerName}** crosses first!",
+            "🎉 Against all odds, **{winnerName}** pulls off the victory!",
+            "🎉 What a comeback! **{winnerName}** steals the win at the end!"
         ]
     };
 
@@ -100,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentPosition: 0, 
                 currentYOffset: 0, 
                 elementContainer: null, 
-                laneElement: null 
+                laneElement: null,
+                previousLeader: false
             };
         });
     }
@@ -153,13 +177,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectWinner() {
-        const sumOfProbabilities = ducks.reduce((sum, duck) => sum + duck.probability, 0);
+        // Add a small random factor to make races less predictable
+        const randomFactor = 0.15; // 15% randomness
+        
+        // Calculate adjusted probabilities with randomness
+        const adjustedDucks = ducks.map(duck => {
+            const randomAdjustment = 1 + (Math.random() * randomFactor * 2 - randomFactor);
+            return {
+                ...duck,
+                adjustedProbability: duck.probability * randomAdjustment
+            };
+        });
+        
+        // Use adjusted probabilities for selection
+        const sumOfProbabilities = adjustedDucks.reduce((sum, duck) => sum + duck.adjustedProbability, 0);
         let random = Math.random() * sumOfProbabilities;
-        for (let duck of ducks) {
-            if (random < duck.probability) return duck;
-            random -= duck.probability;
+        
+        for (let duck of adjustedDucks) {
+            if (random < duck.adjustedProbability) return ducks.find(d => d.id === duck.id);
+            random -= duck.adjustedProbability;
         }
-        return ducks[ducks.length - 1]; 
+        
+        return ducks[ducks.length - 1];
     }
 
     function getRandomAnnouncerLine(stage, substitutions = {}) {
@@ -189,16 +228,52 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (duck.currentPosition < logicalFinishLinePosition + 20 || duck.id === actualWinner.id) {
-                let movement = (Math.random() * 2.5 + 0.5); 
+                // Base movement with more randomness
+                let movement = (Math.random() * 3.5 + 0.2);
+                
+                // Race progress percentage
+                const raceProgress = duck.currentPosition / logicalFinishLinePosition;
+                
+                // Dramatic comeback chances increase in the second half of the race
+                const comebackChance = raceProgress > 0.5 ? 0.15 : 0.05;
+                
+                // Dramatic slowdown chances are higher for early leaders
+                const slowdownChance = raceProgress > 0.6 && duck.currentPosition > logicalFinishLinePosition * 0.25 ? 0.12 : 0.03;
+                
+                // Winner gets a slight advantage, but not overwhelming
                 if (duck.id === actualWinner.id) {
-                    movement += 0.6 + Math.random() * 0.4; 
-                } else {
-                    if (Math.random() < 0.05) movement += Math.random() * 2; 
+                    // Winner advantage varies throughout the race
+                    if (raceProgress < 0.3) {
+                        // Early race: winner might not lead
+                        movement += (Math.random() * 0.3);
+                    } else if (raceProgress > 0.7) {
+                        // Final stretch: winner gets more advantage
+                        movement += (0.3 + Math.random() * 0.5);
+                    } else {
+                        // Middle race: moderate advantage
+                        movement += (Math.random() * 0.5);
+                    }
                 }
-                if (duck.id !== actualWinner.id && Math.random() < 0.02 && duck.currentPosition < logicalFinishLinePosition * 0.9) { 
-                    movement *= 0.1; 
-                    if(Math.random() < 0.3) playSound(SOUNDS.quack); 
+                
+                // Random bursts of speed for any duck
+                if (Math.random() < 0.08) {
+                    movement += Math.random() * 3;
+                    if (Math.random() < 0.3) playSound(SOUNDS.quack);
                 }
+                
+                // Dramatic comeback for trailing ducks
+                if (duck.id !== actualWinner.id && raceProgress < 0.7 && Math.random() < comebackChance) {
+                    movement += 3 + Math.random() * 4;
+                    if (Math.random() < 0.5) playSound(SOUNDS.quack);
+                }
+                
+                // Occasional slowdowns (hitting rough water)
+                if (Math.random() < slowdownChance) {
+                    movement *= 0.2;
+                    if (Math.random() < 0.4) playSound(SOUNDS.quack);
+                }
+                
+                // Apply the movement
                 duck.currentPosition += movement;
             }
             
@@ -234,12 +309,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const leadingDuck = sortedDucks[0];
             let subs = { leadingDuck: leadingDuck.name };
             let stage = 'midRace';
+            
+            // Track previous leader to detect changes
+            const previousLeaderIndex = ducks.findIndex(d => d.previousLeader);
+            const leaderChanged = previousLeaderIndex >= 0 && ducks[previousLeaderIndex].id !== leadingDuck.id;
+            
+            // Update previous leader tracking
+            ducks.forEach(d => d.previousLeader = false);
+            const currentLeaderIndex = ducks.findIndex(d => d.id === leadingDuck.id);
+            if (currentLeaderIndex >= 0) {
+                ducks[currentLeaderIndex].previousLeader = true;
+            }
 
             let randomIndices = [];
             while(randomIndices.length < 3){
                 let r = Math.floor(Math.random() * ducks.length);
                 if(randomIndices.indexOf(r) === -1) randomIndices.push(r);
             }
+            
             if (ducks.length >= 3) { // Ensure enough ducks for placeholders
                 subs.randomDuck1 = ducks[randomIndices[0]].name;
                 subs.randomDuck2 = ducks[randomIndices[1]].name;
@@ -249,16 +336,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 subs.randomDuck2 = "another quick quacker";
                 subs.randomDuck3 = "one more competitor";
             }
-
-
-            if (leadingDuck.currentPosition > logicalFinishLinePosition * 0.75) {
-                stage = 'nearFinish';
-                subs.trailingDuck = sortedDucks.length > 1 ? sortedDucks[ducks.length -1].name : "the last duck";
+            
+            // Race progress
+            const raceProgress = leadingDuck.currentPosition / logicalFinishLinePosition;
+            
+            // Check for dramatic comebacks
+            if (leaderChanged && raceProgress > 0.4) {
+                stage = 'comeback';
+                subs.comebackDuck = leadingDuck.name;
+            } 
+            // Check for potential upsets (lower odds duck in lead past halfway)
+            else if (raceProgress > 0.5 && leadingDuck.odds > 4) {
+                stage = 'upset';
+                subs.upsetDuck = leadingDuck.name;
             }
+            // Near finish announcements
+            else if (leadingDuck.currentPosition > logicalFinishLinePosition * 0.75) {
+                stage = 'nearFinish';
+                subs.trailingDuck = sortedDucks.length > 1 ? sortedDucks[sortedDucks.length - 1].name : "the last duck";
+            }
+            
+            // Determine if we should play a quack sound
+            const shouldQuack = Math.random() < (leaderChanged ? 0.4 : 0.15);
+            if (shouldQuack) playSound(SOUNDS.quack);
+            
             announcer.textContent = getRandomAnnouncerLine(stage, subs);
             lastAnnounceTime = timestamp;
-
-            if (Math.random() < 0.15) playSound(SOUNDS.quack); 
         }
 
         if (actualWinner.currentPosition >= logicalFinishLinePosition) {
