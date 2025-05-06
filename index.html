@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charity Duck Race Deluxe!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Hidden SVG Definitions (can also be in an external SVG file and linked) -->
+    <svg class="hidden-svg-defs">
+        <defs>
+            <symbol id="rubberDuckSymbol" viewBox="0 0 50 45">
+                <path d="M46.6,23.6c0-0.1,0-0.1,0-0.2c0.1-1.9,0.7-3.7,1.7-5.2c1.5-2.4,2.4-5.2,2.4-8.1 c0-7.3-5.9-13.2-13.2-13.2c-3.6,0-6.9,1.4-9.3,3.7c-0.5-0.4-1.1-0.7-1.7-1C25.2,0.7,22.8,0,20,0C11.8,0,5.2,6.6,5.2,14.8 c0,3,0.9,5.8,2.4,8.1c-0.5,0.4-1.1,0.7-1.7,1c-2,1.4-3.3,3.6-3.3,6.1c0,4.1,3.3,7.4,7.4,7.4h28c0.2,0,0.4,0,0.5-0.1 C42.8,36.6,46.6,30.7,46.6,23.6z" />
+                <ellipse cx="36.9" cy="12.8" rx="2.9" ry="2.9" fill="#000000"/> <!-- Eye -->
+                <path d="M40.6,19.3c-2-0.8-4.2-0.4-5.8,1.2c-0.5,0.5-1,1.2-1.3,1.9c-0.2-0.6-0.2-1.3,0-1.9c0.4-1.5,1.6-2.8,3.2-3.5 c1.8-0.7,3.8-0.3,5.1,1.1C41.5,18.2,41.1,18.8,40.6,19.3z" fill="#FFA500"/> <!-- Beak -->
+            </symbol>
+        </defs>
+    </svg>
+
+    <h1>The Great Charity Rubber Duck Race Deluxe!</h1>
+
+    <div id="roster-container">
+        <!-- Ducks will be populated here by JavaScript -->
+    </div>
+
+    <div id="race-area">
+        <div id="finish-line"></div>
+        <!-- Duck racers will be populated here by JavaScript -->
+    </div>
+
+    <div id="controls">
+        <button id="startButton" class="action-button">Start The Race!</button>
+        <button id="nextRaceButton" class="action-button" style="display:none;">Next Race Setup</button>
+    </div>
+
+    <div id="announcer">Place your bets! Quacktastic fun awaits!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
