@@ -176,4 +176,16 @@ h1 {
     /* You might want to apply highlight to the SVG parent or the SVG itself */
     /* e.g., .winner-highlight svg { filter: drop-shadow(0 0 5px gold); } */
     border-radius: 50%; /* If applied to the container */
+}.duck-racer-container {
+    position: absolute;
+    width: 50px;
+    height: 45px;
+    transition: left 0.1s linear;
+}
+
+.track-lane {
+    position: relative;
+    height: 60px;
+    width: 100%;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
 }

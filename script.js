@@ -141,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             duck.currentPosition = 10;
             duck.currentYOffset = (Math.random() - 0.5) * 10; 
-            duck.elementContainer.style.transform = `translateX(${duck.currentPosition}px) translateY(${duck.currentYOffset}px)`;
+            duck.elementContainer.style.left = `${duck.currentPosition}px`;
+            duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px)`;
             
             trackLaneDiv.appendChild(duckContainer);
             raceArea.appendChild(trackLaneDiv);
@@ -203,7 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
             duck.currentYOffset = Math.max(-10, Math.min(10, duck.currentYOffset)); 
 
             const displayX = Math.min(duck.currentPosition, logicalFinishLinePosition + 30);
-            duck.elementContainer.style.transform = `translateX(${displayX}px) translateY(${duck.currentYOffset}px)`;
+            duck.elementContainer.style.left = `${displayX}px`;
+            duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px)`;
         });
 
         if (timestamp - lastAnnounceTime > announceInterval) {
@@ -240,7 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (actualWinner.currentPosition >= logicalFinishLinePosition) {
             actualWinner.currentPosition = logicalFinishLinePosition + 5; 
-            actualWinner.elementContainer.style.transform = `translateX(${actualWinner.currentPosition}px) translateY(${actualWinner.currentYOffset}px)`;
+            actualWinner.elementContainer.style.left = `${actualWinner.currentPosition}px`;
+            actualWinner.elementContainer.style.transform = `translateY(${actualWinner.currentYOffset}px)`;
             actualWinner.elementContainer.classList.add('winner-highlight');
             
             announcer.innerHTML = getRandomAnnouncerLine('winner', { winnerName: actualWinner.name });
