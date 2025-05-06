@@ -255,23 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function playSound(audioElement) {
-        if (!audioElement) return;
-        // Check if the audio element exists and has enough data to play
-        if (audioElement.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
-            audioElement.currentTime = 0;
-            audioElement.play().catch(e => console.warn("Audio play failed:", e.message));
-        } else {
-            // If not ready, try to play when it becomes ready
-            // This is a simple way; more complex handling might be needed for very slow connections
-            // console.warn("Audio not ready, will try on canplaythrough", audioElement.src);
-            const playWhenReady = () => {
-                audioElement.currentTime = 0;
-                audioElement.play().catch(e => console.warn("Audio play failed (oncanplaythrough):", e.message));
-                audioElement.removeEventListener('canplaythrough', playWhenReady); // Clean up listener
-            };
-            audioElement.addEventListener('canplaythrough', playWhenReady);
-            audioElement.load(); // Ensure it tries to load if not already doing so
+    function playSound(sound) {
+        if (!sound) return;
+        try {
+            sound.play();
+        } catch (e) {
+            console.warn("Sound play failed:", e.message);
         }
     }
     
