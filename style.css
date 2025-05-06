@@ -280,16 +280,4 @@ h1 {
     100% { background-position: 20px 20px, 30px 30px, 25px 25px; }
 }
 
-.duck-racer-container {
-    position: absolute;
-    width: 50px;
-    height: 45px;
-    transition: left 0.1s linear;
-}
-
-.track-lane {
-    position: relative;
-    height: 60px;
-    width: 100%;
-    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
-}
+/* These duplicate styles are removed as they're already defined above */
