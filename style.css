@@ -211,7 +211,7 @@ h1 {
 }
 
 @keyframes buoyBobbing {
-    from, to { transform: translateY(0); }
+    0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-3px); }
 }
 
