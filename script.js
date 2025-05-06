@@ -86,14 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ],
       
         upset: [
-          // original
-          "This could be a major upset if {upsetDuck} maintains this pace!",
-          "Nobody saw {upsetDuck} as a contender, but look at them now!",
-          "The underdog {upsetDuck} is showing everyone how it's done!",
-          // new
-          "Plot twist! {upsetDuck} just rewrote the quack‑script!",
-          "{upsetDuck} was 100‑to‑1 this morning. Did someone feed it espresso worms?",
-          "Even the bookies are duck‑ing for cover—what an upset!"
+            "This could be a major upset if {upsetDuck} maintains this pace!",
+            "Nobody saw {upsetDuck} as a contender, but look at them now!",
+            "The underdog {upsetDuck} is showing everyone how it's done!",
+            "Plot twist! {upsetDuck} just rewrote the quack‑script!",
+            "{upsetDuck} was 100‑to‑1 this morning. Did someone feed it espresso worms?",
+            "Even the bookies are duck‑ing for cover—what an upset!"
         ],
       
         nearFinish: [
