@@ -13,24 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const FINISH_LINE_OFFSET = 100; // pixels from right edge for logical finish line
 
-    // --- SOUNDS (Replace placeholders with actual Base64 data or paths to sound files) ---
+    // --- SOUNDS ---
+    // Create dummy audio objects that won't cause errors
     const SOUNDS = {
-        // Example using Base64 (keep as is if you have these)
-        start: new Audio("data:audio/mpeg;base64,SUQzBAAAAAAA..."),
-        quack: new Audio("data:audio/mpeg;base64,SUQzAwAAAAAA..."),
-        cheer: new Audio("data:audio/mpeg;base64,SUQzBQAAAAAA..."),
-
-        // OR Example using external files (if you create a 'sounds' folder)
-        // start: new Audio("sounds/start.mp3"),
-        // quack: new Audio("sounds/quack.mp3"),
-        // cheer: new Audio("sounds/cheer.mp3")
+        start: { play: () => console.log("Start sound would play") },
+        quack: { play: () => console.log("Quack sound would play") },
+        cheer: { play: () => console.log("Cheer sound would play") }
     };
-    Object.values(SOUNDS).forEach(sound => {
-        sound.volume = 0.1; // Set a default volume
-        // Preload sounds - helps ensure they are ready
-        sound.preload = 'auto';
-        sound.load(); // Explicitly load
-    });
 
 
     // --- ANNOUNCER LINES ---
