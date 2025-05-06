@@ -83,6 +83,22 @@ h1 {
     pointer-events: none;
 }
 
+/* White caps on water */
+.white-cap {
+    position: absolute;
+    height: 8px;
+    width: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    z-index: 4;
+    animation: bobCap 2s ease-in-out infinite alternate;
+}
+
+@keyframes bobCap {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-5px); }
+}
+
 .river-bank-top {
     top: 0;
     height: 40px;
@@ -136,40 +152,88 @@ h1 {
     height: 100%;
     position: relative;
     overflow: hidden;
-    /* More realistic river background with multiple layers */
+    /* More cartoonish water background with enhanced motion */
     background: 
-        /* Small ripples layer */
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 3px) 0 0 / 20px 20px,
-        /* Medium ripples layer */
-        radial-gradient(circle at 30% 70%, rgba(255,255,255,0.15) 2px, transparent 4px) 0 0 / 30px 30px,
-        /* Flow lines layer */
-        linear-gradient(90deg, 
-            rgba(255,255,255,0.07) 1px, 
-            transparent 2px, 
-            transparent 10px) 0 0 / 15px 100%,
-        /* Base water color with gradient for depth */
-        linear-gradient(180deg, #2980b9, #3498db 30%, #2980b9 70%, #1e6091);
+        /* Larger ripples layer - more cartoon-like */
+        radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.3) 0%, transparent 70%) 0 0 / 120px 80px,
+        
+        /* Medium "cartoony" waves */
+        radial-gradient(ellipse at 30% 70%, rgba(255,255,255,0.2) 0%, transparent 60%) 0 0 / 100px 60px,
+        
+        /* Small ripples with higher contrast */
+        radial-gradient(circle at 70% 40%, rgba(255,255,255,0.25) 0%, transparent 50%) 0 0 / 50px 50px,
+        
+        /* Stylized wave lines - more dramatic */
+        repeating-linear-gradient(90deg, 
+            rgba(255,255,255,0) 0px, 
+            rgba(255,255,255,0.2) 10px, 
+            rgba(255,255,255,0) 20px) 0 0 / 80px 100%,
+            
+        /* Diagonal flow lines for better motion sense */
+        repeating-linear-gradient(60deg, 
+            rgba(255,255,255,0) 0px, 
+            rgba(255,255,255,0.1) 5px, 
+            rgba(255,255,255,0) 10px) 0 0 / 40px 100%,
+            
+        /* Base water color - more vibrant blue */
+        linear-gradient(180deg, #1a91ff, #40a9ff 30%, #1a91ff 70%, #0066cc);
+        
+    /* Multiple animations with different speeds and directions */
     animation: 
-        animateRipples1 4s linear infinite,
-        animateRipples2 6s linear infinite,
-        animateFlow 2s linear infinite;
+        cartoonRipples1 3s linear infinite,
+        cartoonRipples2 5s linear infinite,
+        cartoonRipples3 4s linear infinite,
+        cartoonWaveLines 1.5s linear infinite,
+        cartoonDiagFlow 2.5s linear infinite;
+    
+    /* Add occasional water splashes using pseudo-elements */
+    position: relative;
 }
 
-@keyframes animateRipples1 {
-    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
-    100% { background-position: 20px 20px, 0 0, 0 0, 0 0; }
+/* Define new animations with more exaggerated movement */
+@keyframes cartoonRipples1 {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 120px 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
 }
 
-@keyframes animateRipples2 {
-    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
-    100% { background-position: 0 0, 30px 10px, 0 0, 0 0; }
+@keyframes cartoonRipples2 {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 0 0, -100px 20px, 0 0, 0 0, 0 0, 0 0; }
 }
 
-@keyframes animateFlow {
-    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
-    100% { background-position: 0 0, 0 0, 15px 0, 0 0; }
+@keyframes cartoonRipples3 {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 0 0, 0 0, 50px -50px, 0 0, 0 0, 0 0; }
 }
 
+@keyframes cartoonWaveLines {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 0 0, 0 0, 0 0, 80px 0, 0 0, 0 0; }
+}
+
+@keyframes cartoonDiagFlow {
+    0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 0 0, 0 0, 0 0, 0 0, 40px 40px, 0 0; }
+}
+
+
+/* Water splash effects */
+.water-splash {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    z-index: 4;
+    opacity: 0;
+    animation: splashAppear 3s ease-out infinite;
+}
+
+@keyframes splashAppear {
+    0% { transform: scale(0.2); opacity: 0; }
+    10% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
 
 .track-lane {
     position: relative;

@@ -153,6 +153,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function createWaterSplashes() {
+        // Create random water splashes
+        const numSplashes = 15;
+        const splashesContainer = document.createElement('div');
+        splashesContainer.id = 'splashes-container';
+        
+        for (let i = 0; i < numSplashes; i++) {
+            const splash = document.createElement('div');
+            splash.className = 'water-splash';
+            
+            // Random position
+            const xPos = Math.random() * 2800; // Spread across race area
+            const yPos = 40 + Math.random() * 400; // Keep within water area
+            
+            // Random animation delay
+            const delay = Math.random() * 10;
+            
+            splash.style.left = `${xPos}px`;
+            splash.style.top = `${yPos}px`;
+            splash.style.animationDelay = `${delay}s`;
+            
+            splashesContainer.appendChild(splash);
+        }
+        
+        // Add white caps
+        const numCaps = 25;
+        for (let i = 0; i < numCaps; i++) {
+            const cap = document.createElement('div');
+            cap.className = 'white-cap';
+            
+            // Random position
+            const xPos = Math.random() * 2800; // Spread across race area
+            const yPos = 50 + Math.random() * 380; // Keep within water area
+            
+            // Random size
+            const width = 15 + Math.random() * 25;
+            
+            // Random animation delay
+            const delay = Math.random() * 5;
+            
+            cap.style.left = `${xPos}px`;
+            cap.style.top = `${yPos}px`;
+            cap.style.width = `${width}px`;
+            cap.style.animationDelay = `${delay}s`;
+            
+            splashesContainer.appendChild(cap);
+        }
+        
+        return splashesContainer;
+    }
+
     function resetRaceVisuals() {
         // Position the finish line at the actual race length
         const finishLinePosition = RACE_LENGTH - FINISH_LINE_OFFSET;
@@ -163,6 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="vegetation vegetation-top"></div>
             <div class="vegetation vegetation-bottom"></div>
         `;
+        
+        // Add water splashes
+        raceArea.appendChild(createWaterSplashes());
         
         // Reset the race area transform
         raceArea.style.transform = 'translateX(0px)';
@@ -302,6 +356,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Apply the movement
                 duck.currentPosition += movement;
+                
+                // Create splash effect on significant movement
+                if (movement > 3 && Math.random() < 0.3) {
+                    createDuckSplash(duck);
+                }
             }
             
             duck.currentYOffset += (Math.random() - 0.5) * 2; 
@@ -426,6 +485,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function createDuckSplash(duck) {
+        // Create a temporary splash effect behind the duck
+        const splash = document.createElement('div');
+        splash.className = 'water-splash';
+        
+        // Position it just behind the duck
+        const splashX = duck.currentPosition - 10;
+        const splashY = duck.laneElement.offsetTop + 30 + duck.currentYOffset;
+        
+        splash.style.left = `${splashX}px`;
+        splash.style.top = `${splashY}px`;
+        splash.style.opacity = '0.7';
+        splash.style.zIndex = '9';
+        
+        // Add to race area
+        raceArea.appendChild(splash);
+        
+        // Remove after animation completes
+        setTimeout(() => {
+            if (splash.parentNode) {
+                splash.parentNode.removeChild(splash);
+            }
+        }, 1000);
+    }
+    
     function endRace(winner) {
         winner.currentPosition = logicalFinishLinePosition + 5; 
         winner.elementContainer.style.left = `${winner.currentPosition}px`;
