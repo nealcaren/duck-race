@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURATION ---
     const DUCK_DATA_MASTER = [
-        { id: 1, name: "Quack Sparrow", odds: 2, fillColor: "#FFD700" /* Gold */ },
-        { id: 2, name: "Feather Fawcett", odds: 3, fillColor: "#FFC0CB" /* Pink */ },
-        { id: 3, name: "Bill Clinton", odds: 4, fillColor: "#ADD8E6" /* LightBlue */ },
-        { id: 4, name: "Sir Quacks-A-Lot", odds: 5, fillColor: "#FFA500" /* Orange */ },
-        { id: 5, name: "Duck Norris", odds: 5, fillColor: "#90EE90" /* LightGreen */ },
-        { id: 6, name: "The Ugly Duckling", odds: 9, fillColor: "#DA70D6" /* Orchid */ }
+        { id: 1, name: "Sir Quacks-a-Lot", odds: 2, fillColor: "#FFD700" /* Gold */ },
+        { id: 2, name: "Turbo Waddles", odds: 3, fillColor: "#FFC0CB" /* Pink */ },
+        { id: 3, name: "Puddle Jumper", odds: 4, fillColor: "#ADD8E6" /* LightBlue */ },
+        { id: 4, name: "Fowl Play", odds: 5, fillColor: "#FFA500" /* Orange */ },
+        { id: 5, name: "Quacker Jack", odds: 5, fillColor: "#90EE90" /* LightGreen */ },
+        { id: 6, name: "Splash Gordon", odds: 9, fillColor: "#DA70D6" /* Orchid */ }
     ];
 
     const FINISH_LINE_OFFSET = 100; // pixels from right edge for logical finish line
