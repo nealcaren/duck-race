@@ -609,10 +609,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // console.log("The pre-determined winner is: ", winner.name); 
         // console.log("Target Finish X:", logicalFinishLinePosition);
 
+        // Wait 4.5 seconds after sound starts before beginning the race
         setTimeout(() => {
             lastAnnounceTime = performance.now(); 
             animationFrameId = requestAnimationFrame((ts) => animateRace(ts, winner));
-        }, 1000); 
+        }, 4500); 
     });
 
     nextRaceButton.addEventListener('click', () => {
