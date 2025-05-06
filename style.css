@@ -256,7 +256,7 @@ h1 {
 
 #finish-line {
     position: absolute;
-    /* 'right' value will be set by JS if needed, or keep as is */
+    /* 'left' value will be set by JS */
     top: 0;
     bottom: 0;
     width: 5px;

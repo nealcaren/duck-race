@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 6, name: "Splash Gordon", odds: 9, fillColor: "#DA70D6" /* Orchid */ }
     ];
 
-    const FINISH_LINE_OFFSET = 100; // pixels from right edge for logical finish line
+    const FINISH_LINE_OFFSET = 100; // pixels from edge for finish line
     const RACE_LENGTH = 2000; // Total race length in pixels (twice as long)
     const VIEWPORT_WIDTH = 1000; // Approximate viewport width
 
@@ -100,9 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- CORE FUNCTIONS ---
 
     function updateLogicalFinishLine() {
-        // Set finish line position based on the race length, not the viewport
+        // Set finish line position based on the race length
         logicalFinishLinePosition = RACE_LENGTH - FINISH_LINE_OFFSET;
-        // console.log("Updated logicalFinishLinePosition:", logicalFinishLinePosition);
+        
+        // Update the visual finish line position if it exists
+        const finishLine = document.getElementById('finish-line');
+        if (finishLine) {
+            finishLine.style.left = `${logicalFinishLinePosition}px`;
+        }
     }
 
     function initializeGame() {
@@ -149,15 +154,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetRaceVisuals() {
-        // The finish line is initially off-screen to the right
-        const visualFinishLineRightOffset = FINISH_LINE_OFFSET - 5; 
+        // Position the finish line at the actual race length
+        const finishLinePosition = RACE_LENGTH - FINISH_LINE_OFFSET;
         raceArea.innerHTML = `
-            <div id="finish-line" style="right:${visualFinishLineRightOffset}px;"></div>
+            <div id="finish-line" style="left:${finishLinePosition}px;"></div>
             <div class="river-bank river-bank-top"></div>
             <div class="river-bank river-bank-bottom"></div>
             <div class="vegetation vegetation-top"></div>
             <div class="vegetation vegetation-bottom"></div>
         `;
+        
+        // Reset the race area transform
+        raceArea.style.transform = 'translateX(0px)';
         
         ducks.forEach((duck) => {
             const trackLaneDiv = document.createElement('div');
@@ -299,29 +307,25 @@ document.addEventListener('DOMContentLoaded', () => {
             duck.currentYOffset += (Math.random() - 0.5) * 2; 
             duck.currentYOffset = Math.max(-10, Math.min(10, duck.currentYOffset)); 
 
-            // For side-scrolling effect:
-            // If duck is past the halfway point of the viewport, keep it centered
-            // and move the background instead
-            let displayX;
-            if (duck.currentPosition > VIEWPORT_WIDTH / 2) {
-                // Keep duck centered in viewport
-                displayX = VIEWPORT_WIDTH / 2;
-                // Calculate how far to scroll the race area
-                const scrollX = -(duck.currentPosition - VIEWPORT_WIDTH / 2);
-                // Apply scroll to race area (only for the lead duck)
-                if (sortedDucks && sortedDucks[0] && duck.id === sortedDucks[0].id) {
-                    raceArea.style.transform = `translateX(${scrollX}px)`;
-                }
-            } else {
-                // Duck is still in first half of viewport, normal movement
-                displayX = duck.currentPosition;
-            }
-            
-            duck.elementContainer.style.left = `${displayX}px`;
+            // Always use the actual position for the duck's left value
+            duck.elementContainer.style.left = `${duck.currentPosition}px`;
         });
         
         // Sort ducks by position to determine race order
         const sortedDucks = [...ducks].sort((a, b) => b.currentPosition - a.currentPosition);
+        
+        // Handle side-scrolling based on lead duck position
+        if (sortedDucks.length > 0) {
+            const leadDuck = sortedDucks[0];
+            if (leadDuck.currentPosition > VIEWPORT_WIDTH / 2) {
+                // Calculate how far to scroll the race area
+                const scrollX = -(leadDuck.currentPosition - VIEWPORT_WIDTH / 2);
+                // Apply scroll to race area
+                raceArea.style.transform = `translateX(${scrollX}px)`;
+            } else {
+                raceArea.style.transform = 'translateX(0px)';
+            }
+        }
         
         // Apply different animation styles based on race position
         sortedDucks.forEach((duck, index) => {
