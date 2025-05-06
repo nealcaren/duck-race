@@ -27,17 +27,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ANNOUNCER LINES ---
     const ANNOUNCER_LINES = {
         preRace: [
-            "Place your bets! Quacktastic fun awaits!",
-            "The ducks are lining up! Who's your champion?",
-            "Odds are on the board! Get your wagers in!",
-            "Feathers will fly! Or... float, rather. Bet now!"
+          // original
+          "Place your bets! Quacktastic fun awaits!",
+          "The ducks are lining up! Who's your champion?",
+          "Odds are on the board! Get your wagers in!",
+          "Feathers will fly! Or... float, rather. Bet now!",
+          // new
+          "Remember: the early bird gets the worm, but the early duck gets the W!",
+          "If you’re feeling lucky, wadd-le you waiting for?",
+          "Grab your popcorn—this show will be a real feather in your cap!",
+          "These ducks practiced all week; they’re truly in their quack‑athletic prime!"
         ],
+      
         start: [
-            "And they're OFF! A flurry of feathers and fury!",
-            "The race has begun! May the best duck win!",
-            "They're in the water! What a quack-tacular start!",
-            "Go, ducks, go! The crowd is roaring!"
+          // original
+          "And they're OFF! A flurry of feathers and fury!",
+          "The race has begun! May the best duck win!",
+          "They're in the water! What a quack-tacular start!",
+          "Go, ducks, go! The crowd is roaring!",
+          // new
+          "It’s paddle‑to‑the‑metal time—no fowl play allowed!",
+          "Cue the suspense music: it’s about to get bill‑serious!",
+          "Blink and you'll miss it—these ducks are faster than a dad joke at Thanksgiving!",
+          "Hold on to your tail feathers; it’s splash o’clock!"
         ],
+      
         midRace: [
             "{leadingDuck} is making a splash!",
             "It's a tight race! Any duck could take it!",
@@ -45,45 +59,72 @@ document.addEventListener('DOMContentLoaded', () => {
             "Look at {randomDuck2} go! What a surge!",
             "The current seems to favor {leadingDuck} right now!",
             "Oh! {randomDuck3} hit a bit of rough water!",
-            "Still anyone's race, folks! Don't blink!",
             "WHOA! {randomDuck1} just found an extra gear!",
             "{randomDuck2} seems to be struggling against the current!",
-            "The pack is bunching up! This is getting intense!",
             "What a move by {randomDuck3}! Cutting through the water!",
             "The lead has changed THREE TIMES in the last few seconds!",
             "I've never seen a duck race this unpredictable!"
+          // new
+          "{leadingDuck} just said, ‘Water you all doing back there?’",
+          "If enthusiasm were bread, {randomDuck1} would be a quacker‑jack!",
+          "Rumor has it {randomDuck2} switched to decaf—explain the slow paddling?",
+          "Is it just me or did {randomDuck3} install paddle‑assist this season?",
+          "Current status: currents really helping {leadingDuck}! #StreamTeam",
+          "Featherweight champ {randomDuck1} is bob‑bing and weaving!",
+          "Looks like {randomDuck2} left the iron on—better hurry back home after this!"
         ],
+      
         comeback: [
-            "INCREDIBLE! {comebackDuck} is making a dramatic move from behind!",
-            "Where did THAT come from?! {comebackDuck} is surging!",
-            "The crowd is going wild as {comebackDuck} makes a push!",
-            "Don't count out {comebackDuck}! What a recovery!"
+          // original
+          "Where did THAT come from?! {comebackDuck} is surging!",
+          "The crowd is going wild as {comebackDuck} makes a push!",
+          "Don't count out {comebackDuck}! What a recovery!",
+          // new
+          "Holy quack‑amole! {comebackDuck} is on a tear!",
+          "From zero to hero: {comebackDuck} just upgraded to turbo‑paddle!",
+          "Mom always said, ‘Put your bill to the grindstone’—{comebackDuck} listened!"
         ],
+      
         upset: [
-            "This could be a major upset if {upsetDuck} maintains this pace!",
-            "Nobody saw {upsetDuck} as a contender, but look at them now!",
-            "The underdog {upsetDuck} is showing everyone how it's done!"
+          // original
+          "This could be a major upset if {upsetDuck} maintains this pace!",
+          "Nobody saw {upsetDuck} as a contender, but look at them now!",
+          "The underdog {upsetDuck} is showing everyone how it's done!",
+          // new
+          "Plot twist! {upsetDuck} just rewrote the quack‑script!",
+          "{upsetDuck} was 100‑to‑1 this morning. Did someone feed it espresso worms?",
+          "Even the bookies are duck‑ing for cover—what an upset!"
         ],
+      
         nearFinish: [
-            "Down the final stretch they come!",
-            "{leadingDuck} is pulling ahead!",
-            "It's neck and neck between {randomDuck1} and {randomDuck2} for second!",
-            "The finish line is in sight! This is it!",
-            "Can {trailingDuck} make a last-minute comeback?",
-            "Photo finish coming up! I can't tell who's ahead!",
-            "They're beak to beak with just meters to go!",
-            "The crowd is on their feet! What a finish we're about to see!"
+          // original
+          "Down the final stretch they come!",
+          "{leadingDuck} is pulling ahead!",
+          "It's neck and neck between {randomDuck1} and {randomDuck2} for second!",
+          "The finish line is in sight! This is it!",
+          "Can {trailingDuck} make a last-minute comeback?",
+          "Photo finish coming up! I can't tell who's ahead!",
+          "They're beak to beak with just meters to go!",
+          "The crowd is on their feet! What a finish we're about to see!",
+          // new
+          "This is tighter than a dad’s grip on the TV remote!",
+          "Get your cameras ready—someone’s about to bill‑ieve in miracles!",
+          "{leadingDuck} just switched to Luduckrous speed!",
+          "Will it be a quack‑attack or a silent paddle to victory?"
         ],
+      
         winner: [
-            "🎉 And the winner is... **{winnerName}**! Unbelievable!",
-            "🎉 **{winnerName}** takes the crown! What a race!",
-            "🎉 By a beak! It's **{winnerName}** for the win!",
-            "🎉 Let's hear it for our champion, **{winnerName}**!",
-            "🎉 In a stunning finish, **{winnerName}** crosses first!",
-            "🎉 Against all odds, **{winnerName}** pulls off the victory!",
-            "🎉 What a comeback! **{winnerName}** steals the win at the end!"
+          // original
+          "🎉 And the winner is... {winnerName}! Unbelievable!",
+          "🎉 {winnerName} takes the crown! What a race!",
+          "🎉 By a beak! It's {winnerName} for the win!",
+          "🎉 Let's hear it for our champion, {winnerName}!",
+          "🎉 In a stunning finish, {winnerName} crosses first!",
+          "🎉 Against all odds, {winnerName} pulls off the victory!",
+          "🎉 What a comeback! {winnerName} steals the win at the end!",
         ]
-    };
+      };
+      
 
     // --- DOM ELEMENTS ---
     const rosterContainer = document.getElementById('roster-container');
