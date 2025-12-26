@@ -67,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const NUM_OBSTACLES = 6; // Number of obstacles on the course
     const OBSTACLE_COLLISION_RADIUS = 30; // Pixels for collision detection
     const OBSTACLE_EFFECT_DURATION = 800; // ms that obstacle affects duck
+    const DUCK_PASSING_DISTANCE = 40; // Distance at which ducks will switch lanes to pass
+    const LANE_SWITCH_COOLDOWN = 1000; // ms cooldown between lane switches
 
     // --- SOUNDS ---
     // Real audio objects for race sounds
@@ -199,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let waterEffectsContainer = null; // Reusable container for water effects
     let obstacles = []; // Array of active obstacle objects
     let obstacleEffects = new Map(); // Track which ducks are affected by obstacles
+    let lastLaneSwitchTime = new Map(); // Track when each duck last switched lanes
 
     // --- CORE FUNCTIONS ---
 
@@ -511,6 +514,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             const newLaneIndex = Math.max(0, Math.min(5, currentLaneIndex + switchDirection));
 
                             if (newLaneIndex !== currentLaneIndex) {
+                                // Add smooth animation class
+                                duck.elementContainer.classList.add('lane-switching');
+
                                 // Get the target lane element
                                 const targetLane = ducks[newLaneIndex].laneElement;
 
@@ -526,12 +532,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 // Reset Y offset for the new lane
                                 duck.currentYOffset = (Math.random() - 0.5) * 10;
+
+                                // Remove animation class after animation completes
+                                setTimeout(() => {
+                                    duck.elementContainer.classList.remove('lane-switching');
+                                }, 400);
                             }
 
                             // Create visual feedback
                             createObstacleCollisionEffect(duck, obstacle);
                         }
                     });
+                }
+            }
+
+            // Check for duck-to-duck collision (passing logic)
+            const lastSwitch = lastLaneSwitchTime.get(duck.id) || 0;
+            const canSwitchLanes = (currentTime - lastSwitch) > LANE_SWITCH_COOLDOWN;
+
+            if (canSwitchLanes) {
+                // Find all other ducks in the same lane ahead of this duck
+                const currentLaneIndex = ducks.findIndex(d => d.id === duck.id);
+                const ducksInSameLane = ducks.filter((d, idx) =>
+                    idx !== currentLaneIndex &&
+                    d.laneElement === duck.laneElement &&
+                    d.currentPosition > duck.currentPosition && // Ahead of current duck
+                    d.currentPosition - duck.currentPosition < DUCK_PASSING_DISTANCE // Close enough
+                );
+
+                if (ducksInSameLane.length > 0) {
+                    // Duck is catching up to another duck - switch lanes to pass!
+                    const switchDirection = Math.random() > 0.5 ? 1 : -1;
+                    const newLaneIndex = Math.max(0, Math.min(5, currentLaneIndex + switchDirection));
+
+                    if (newLaneIndex !== currentLaneIndex) {
+                        // Add smooth animation class
+                        duck.elementContainer.classList.add('lane-switching');
+
+                        // Get the target lane element
+                        const targetLane = ducks[newLaneIndex].laneElement;
+
+                        // Move this duck's element to the new lane
+                        targetLane.appendChild(duck.elementContainer);
+
+                        // Update the duck's lane reference
+                        const oldLane = duck.laneElement;
+                        duck.laneElement = targetLane;
+
+                        // Swap the lane assignments so other duck moves to old lane
+                        ducks[newLaneIndex].laneElement = oldLane;
+
+                        // Reset Y offset for the new lane
+                        duck.currentYOffset = (Math.random() - 0.5) * 10;
+
+                        // Record the lane switch time
+                        lastLaneSwitchTime.set(duck.id, currentTime);
+
+                        // Remove animation class after animation completes
+                        setTimeout(() => {
+                            duck.elementContainer.classList.remove('lane-switching');
+                        }, 400);
+                    }
                 }
             }
 
