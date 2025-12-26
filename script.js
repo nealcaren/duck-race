@@ -380,9 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add water splashes
         raceArea.appendChild(createWaterSplashes());
 
-        // Add obstacles AFTER water effects but BEFORE ducks
-        createObstacles();
-
         // Reset the race area transform
         raceArea.style.transform = 'translateX(0px)';
         
@@ -507,6 +504,16 @@ document.addEventListener('DOMContentLoaded', () => {
                                 type: obstacle.speedEffect.type,
                                 obstacleType: obstacle.type
                             });
+
+                            // Create bounce effect - push duck back and bounce up
+                            const bounceIntensity = obstacle.speedEffect.modifier > 1 ? 8 : -5;
+                            duck.currentPosition -= bounceIntensity; // Bounce back or forward
+
+                            // Add visual bounce animation
+                            duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px) scale(1.15)`;
+                            setTimeout(() => {
+                                duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px) scale(1)`;
+                            }, 150);
 
                             // Create visual feedback
                             createObstacleCollisionEffect(duck, obstacle);
@@ -896,6 +903,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Wait for delay after sound starts before beginning the race
         setTimeout(() => {
+            // Create obstacles now that race is starting
+            createObstacles();
+
             lastAnnounceTime = performance.now();
             animationFrameId = requestAnimationFrame((ts) => animateRace(ts, winner));
         }, RACE_START_DELAY); 

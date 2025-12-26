@@ -266,7 +266,7 @@ h1 {
     top: 5px; /* Starting Y within lane */
     width: 60px; /* Width for duck SVG */
     height: 60px; /* Height for duck SVG */
-    transition: transform 0.1s linear, left 0.1s linear;
+    transition: transform 0.15s ease-out, left 0.1s linear, opacity 0.3s ease;
 }
 
 .duck-racer-container svg {
