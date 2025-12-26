@@ -505,15 +505,28 @@ document.addEventListener('DOMContentLoaded', () => {
                                 obstacleType: obstacle.type
                             });
 
-                            // Create bounce effect - push duck back and bounce up
-                            const bounceIntensity = obstacle.speedEffect.modifier > 1 ? 8 : -5;
-                            duck.currentPosition -= bounceIntensity; // Bounce back or forward
+                            // LANE SWITCHING: Actually move duck to a different lane
+                            const currentLaneIndex = ducks.findIndex(d => d.id === duck.id);
+                            const switchDirection = Math.random() > 0.5 ? 1 : -1; // Randomly up or down
+                            const newLaneIndex = Math.max(0, Math.min(5, currentLaneIndex + switchDirection));
 
-                            // Add visual bounce animation
-                            duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px) scale(1.15)`;
-                            setTimeout(() => {
-                                duck.elementContainer.style.transform = `translateY(${duck.currentYOffset}px) scale(1)`;
-                            }, 150);
+                            if (newLaneIndex !== currentLaneIndex) {
+                                // Get the target lane element
+                                const targetLane = ducks[newLaneIndex].laneElement;
+
+                                // Move this duck's element to the new lane
+                                targetLane.appendChild(duck.elementContainer);
+
+                                // Update the duck's lane reference
+                                const oldLane = duck.laneElement;
+                                duck.laneElement = targetLane;
+
+                                // Swap the lane assignments so other duck moves to old lane
+                                ducks[newLaneIndex].laneElement = oldLane;
+
+                                // Reset Y offset for the new lane
+                                duck.currentYOffset = (Math.random() - 0.5) * 10;
+                            }
 
                             // Create visual feedback
                             createObstacleCollisionEffect(duck, obstacle);
