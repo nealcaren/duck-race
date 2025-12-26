@@ -32,6 +32,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const NUM_WHITE_CAPS = 25; // Number of white caps on water
     const DUCK_Y_OFFSET_MAX = 10; // Maximum vertical bobbing offset in pixels
 
+    // Obstacle configuration
+    const OBSTACLE_TYPES = [
+        {
+            id: 'beach-ball',
+            emoji: '🏐',
+            size: 40,
+            speedEffect: { type: 'bounce', modifier: 1.5 }, // Speed boost!
+            driftSpeed: 0.5
+        },
+        {
+            id: 'rubber-duckie',
+            emoji: '🦆',
+            size: 35,
+            speedEffect: { type: 'friend', modifier: 1.2 }, // Slight boost
+            driftSpeed: 0.8
+        },
+        {
+            id: 'pool-floatie',
+            emoji: '🛟',
+            size: 45,
+            speedEffect: { type: 'tangle', modifier: 0.4 }, // Slowdown!
+            driftSpeed: 0.3
+        },
+        {
+            id: 'toy-boat',
+            emoji: '⛵',
+            size: 50,
+            speedEffect: { type: 'wave', modifier: 0.6 }, // Moderate slowdown
+            driftSpeed: 1.2
+        }
+    ];
+
+    const NUM_OBSTACLES = 6; // Number of obstacles on the course
+    const OBSTACLE_COLLISION_RADIUS = 30; // Pixels for collision detection
+    const OBSTACLE_EFFECT_DURATION = 800; // ms that obstacle affects duck
+
     // --- SOUNDS ---
     // Real audio objects for race sounds
     const SOUNDS = {
@@ -134,6 +170,17 @@ document.addEventListener('DOMContentLoaded', () => {
           "🎉 In a stunning finish, {winnerName} crosses first!",
           "🎉 Against all odds, {winnerName} pulls off the victory!",
           "🎉 What a comeback! {winnerName} steals the win at the end!",
+        ],
+
+        obstacle: [
+            "{duckName} just bounced off a beach ball!",
+            "Look out! {duckName} hit a pool floatie!",
+            "{duckName} made friends with a rubber duckie! Speed boost!",
+            "Oh no! {duckName} got tangled in a toy boat!",
+            "{duckName} just navigated around that obstacle like a pro!",
+            "What a move by {duckName} dodging that floatie!",
+            "WHOA! {duckName} just hit something!",
+            "{duckName} bouncing through the course like a pinball!"
         ]
       };
       
@@ -150,6 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let ducks = [];
     let logicalFinishLinePosition;
     let waterEffectsContainer = null; // Reusable container for water effects
+    let obstacles = []; // Array of active obstacle objects
+    let obstacleEffects = new Map(); // Track which ducks are affected by obstacles
 
     // --- CORE FUNCTIONS ---
 
@@ -205,6 +254,55 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             rosterContainer.appendChild(rosterDuckDiv);
         });
+    }
+
+    /**
+     * Creates interactive, moving obstacles on the race course
+     * Obstacles drift horizontally and vertically, affecting duck speed on collision
+     */
+    function createObstacles() {
+        obstacles = [];
+
+        for (let i = 0; i < NUM_OBSTACLES; i++) {
+            // Random obstacle type
+            const obstacleType = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
+
+            // Random starting position across race length
+            const startX = 200 + Math.random() * (RACE_LENGTH - 400);
+
+            // Random lane (0-5 for 6 ducks)
+            const lane = Math.floor(Math.random() * 6);
+            const laneY = lane * 75 + 20; // 75px per lane, centered
+
+            // Random drift direction
+            const driftDirection = Math.random() > 0.5 ? 1 : -1;
+
+            // Create DOM element
+            const obstacleDiv = document.createElement('div');
+            obstacleDiv.className = 'race-obstacle';
+            obstacleDiv.style.left = `${startX}px`;
+            obstacleDiv.style.top = `${laneY}px`;
+            obstacleDiv.style.fontSize = `${obstacleType.size}px`;
+            obstacleDiv.textContent = obstacleType.emoji;
+            obstacleDiv.setAttribute('data-type', obstacleType.id);
+
+            const obstacle = {
+                id: `obstacle-${i}`,
+                type: obstacleType.id,
+                currentPosition: startX,
+                currentLaneY: laneY,
+                lane: lane,
+                elementContainer: obstacleDiv,
+                driftSpeed: obstacleType.driftSpeed,
+                driftDirection: driftDirection,
+                verticalDrift: Math.random() * 2 - 1, // Slight up/down drift
+                speedEffect: obstacleType.speedEffect,
+                typeData: obstacleType
+            };
+
+            obstacles.push(obstacle);
+            raceArea.appendChild(obstacleDiv);
+        }
     }
 
     /**
@@ -281,7 +379,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Add water splashes
         raceArea.appendChild(createWaterSplashes());
-        
+
+        // Add obstacles AFTER water effects but BEFORE ducks
+        createObstacles();
+
         // Reset the race area transform
         raceArea.style.transform = 'translateX(0px)';
         
@@ -381,6 +482,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update duck positions
         ducks.forEach(duck => {
+            // Check for obstacle collisions
+            const currentTime = timestamp;
+            const activeEffect = obstacleEffects.get(duck.id);
+
+            if (activeEffect && currentTime >= activeEffect.endTime) {
+                // Effect expired - remove it
+                obstacleEffects.delete(duck.id);
+            } else if (!activeEffect || currentTime < activeEffect.endTime) {
+                // Check for new collisions (only if not currently affected)
+                if (!activeEffect) {
+                    obstacles.forEach(obstacle => {
+                        const distanceX = Math.abs(duck.currentPosition - obstacle.currentPosition);
+                        const distanceY = Math.abs((duck.laneElement.offsetTop + 30) - obstacle.currentLaneY);
+
+                        // Simple circle collision: check if within radius
+                        const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+
+                        if (distance < OBSTACLE_COLLISION_RADIUS) {
+                            // Collision detected! Apply effect
+                            obstacleEffects.set(duck.id, {
+                                endTime: currentTime + OBSTACLE_EFFECT_DURATION,
+                                modifier: obstacle.speedEffect.modifier,
+                                type: obstacle.speedEffect.type,
+                                obstacleType: obstacle.type
+                            });
+
+                            // Create visual feedback
+                            createObstacleCollisionEffect(duck, obstacle);
+                        }
+                    });
+                }
+            }
+
             if (duck.currentPosition >= logicalFinishLinePosition) {
                 if (duck.id === actualWinner.id) {
                     winnerHasCrossed = true;
@@ -390,6 +524,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (duck.currentPosition < logicalFinishLinePosition + 20 || duck.id === actualWinner.id) {
                 // Base movement with randomness (0.2 to 3.7 pixels per frame)
                 let movement = (Math.random() * 3.5 + 0.2);
+
+                // Apply obstacle effect if duck is currently affected
+                const obstacleEffect = obstacleEffects.get(duck.id);
+                if (obstacleEffect) {
+                    movement *= obstacleEffect.modifier;
+                    // Visual indicator: make duck slightly dimmer when slowed down
+                    duck.elementContainer.style.opacity = obstacleEffect.modifier > 1 ? '1' : '0.8';
+                } else {
+                    duck.elementContainer.style.opacity = '1';
+                }
 
                 // Calculate how far through the race this duck is (0.0 to 1.0)
                 const raceProgress = duck.currentPosition / logicalFinishLinePosition;
@@ -460,7 +604,33 @@ document.addEventListener('DOMContentLoaded', () => {
             // Always use the actual position for the duck's left value
             duck.elementContainer.style.left = `${duck.currentPosition}px`;
         });
-        
+
+        // Animate obstacles - make them drift across lanes
+        obstacles.forEach(obstacle => {
+            // Horizontal drift (left/right movement)
+            obstacle.currentPosition += obstacle.driftSpeed * obstacle.driftDirection;
+
+            // Vertical drift (slight up/down wobble between lanes)
+            obstacle.currentLaneY += obstacle.verticalDrift;
+
+            // Keep within vertical bounds (40px to 440px for 6 lanes)
+            if (obstacle.currentLaneY < 40 || obstacle.currentLaneY > 440) {
+                obstacle.verticalDrift *= -1; // Reverse direction
+                obstacle.currentLaneY += obstacle.verticalDrift * 2; // Bounce back
+            }
+
+            // Wrap around horizontally (obstacles loop from end to start)
+            if (obstacle.currentPosition > RACE_LENGTH) {
+                obstacle.currentPosition = 0;
+            } else if (obstacle.currentPosition < 0) {
+                obstacle.currentPosition = RACE_LENGTH;
+            }
+
+            // Update DOM position
+            obstacle.elementContainer.style.left = `${obstacle.currentPosition}px`;
+            obstacle.elementContainer.style.top = `${obstacle.currentLaneY}px`;
+        });
+
         // Sort ducks by position to determine race order
         const sortedDucks = [...ducks].sort((a, b) => b.currentPosition - a.currentPosition);
         
@@ -582,25 +752,59 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create a temporary splash effect behind the duck
         const splash = document.createElement('div');
         splash.className = 'water-splash';
-        
+
         // Position it just behind the duck
         const splashX = duck.currentPosition - 10;
         const splashY = duck.laneElement.offsetTop + 30 + duck.currentYOffset;
-        
+
         splash.style.left = `${splashX}px`;
         splash.style.top = `${splashY}px`;
         splash.style.opacity = '0.7';
         splash.style.zIndex = '9';
-        
+
         // Add to race area
         raceArea.appendChild(splash);
-        
+
         // Remove after animation completes
         setTimeout(() => {
             if (splash.parentNode) {
                 splash.parentNode.removeChild(splash);
             }
         }, 1000);
+    }
+
+    function createObstacleCollisionEffect(duck, obstacle) {
+        // Create a sparkle/splash effect when duck hits obstacle
+        const spark = document.createElement('div');
+        spark.className = 'collision-spark';
+
+        // Position at collision point
+        const sparkX = (duck.currentPosition + obstacle.currentPosition) / 2;
+        const sparkY = (duck.laneElement.offsetTop + obstacle.currentLaneY) / 2;
+
+        spark.style.left = `${sparkX}px`;
+        spark.style.top = `${sparkY}px`;
+
+        // Different colors for different effects
+        if (obstacle.speedEffect.modifier > 1) {
+            spark.style.background = 'radial-gradient(circle, rgba(0, 255, 100, 0.9) 0%, transparent 70%)'; // Green for speed boost
+        } else {
+            spark.style.background = 'radial-gradient(circle, rgba(255, 100, 0, 0.9) 0%, transparent 70%)'; // Orange for slowdown
+        }
+
+        raceArea.appendChild(spark);
+
+        // Play sound effect (if available)
+        if (obstacle.speedEffect.modifier > 1) {
+            playSound(SOUNDS.quack); // Happy quack for boost
+        }
+
+        // Remove after animation
+        setTimeout(() => {
+            if (spark.parentNode) {
+                spark.parentNode.removeChild(spark);
+            }
+        }, 500);
     }
     
     function endRace(winner) {

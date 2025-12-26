@@ -427,4 +427,43 @@ h1 {
     100% { background-position: 20px 20px, 30px 30px, 25px 25px; }
 }
 
+/* Obstacle styling */
+.race-obstacle {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6; /* Above vegetation, below ducks */
+    pointer-events: none;
+    animation: obstacleBobbing 2s ease-in-out infinite alternate;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.1s linear;
+}
+
+@keyframes obstacleBobbing {
+    0% { transform: translateY(0px) rotate(-3deg) scale(1); }
+    50% { transform: translateY(-5px) rotate(3deg) scale(1.05); }
+    100% { transform: translateY(0px) rotate(-3deg) scale(1); }
+}
+
+/* Obstacle collision effect */
+.collision-spark {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.9) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 9;
+    pointer-events: none;
+    animation: sparkPop 0.5s ease-out forwards;
+}
+
+@keyframes sparkPop {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
 /* These duplicate styles are removed as they're already defined above */
