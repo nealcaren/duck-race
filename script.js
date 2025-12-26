@@ -67,7 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const NUM_OBSTACLES = 6; // Number of obstacles on the course
     const OBSTACLE_COLLISION_RADIUS = 30; // Pixels for collision detection
     const OBSTACLE_EFFECT_DURATION = 800; // ms that obstacle affects duck
-    const DUCK_PASSING_DISTANCE = 40; // Distance at which ducks will switch lanes to pass
+    const DUCK_PASSING_DISTANCE = 80; // Distance at which ducks will switch lanes to pass
+    const DUCK_COLLISION_DISTANCE = 30; // Distance at which ducks slow down to avoid collision
     const LANE_SWITCH_COOLDOWN = 1000; // ms cooldown between lane switches
 
     // --- SOUNDS ---
@@ -605,6 +606,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (duck.currentPosition < logicalFinishLinePosition + 20 || duck.id === actualWinner.id) {
                 // Base movement with randomness (0.2 to 3.7 pixels per frame)
                 let movement = (Math.random() * 3.5 + 0.2);
+
+                // Check for duck-to-duck collision in same lane (slowdown to prevent overlap)
+                const currentLaneIndex = ducks.findIndex(d => d.id === duck.id);
+                const ducksDirectlyAhead = ducks.filter((d, idx) =>
+                    idx !== currentLaneIndex &&
+                    d.laneElement === duck.laneElement &&
+                    d.currentPosition > duck.currentPosition &&
+                    d.currentPosition - duck.currentPosition < DUCK_COLLISION_DISTANCE
+                );
+
+                if (ducksDirectlyAhead.length > 0) {
+                    // Duck is too close to another duck - slow down significantly
+                    movement *= 0.3; // Reduce to 30% speed to avoid collision
+                }
 
                 // Apply obstacle effect if duck is currently affected
                 const obstacleEffect = obstacleEffects.get(duck.id);
