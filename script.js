@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rosterDuckDiv = document.createElement('div');
             rosterDuckDiv.classList.add('roster-duck');
             rosterDuckDiv.innerHTML = `
-                <svg viewBox="0 0 50 45" style="fill:${data.fillColor};">
+                <svg viewBox="0 0 100 100" style="fill:${data.fillColor};">
                     <use xlink:href="#rubberDuckSymbol"></use>
                 </svg>
                 <h3>${data.name}</h3>
@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const duckContainer = document.createElement('div');
             duckContainer.classList.add('duck-racer-container');
             duckContainer.innerHTML = `
-                <svg viewBox="0 0 50 45" style="fill:${duck.fillColor};">
+                <svg viewBox="0 0 100 100" style="fill:${duck.fillColor};">
                     <use xlink:href="#rubberDuckSymbol"></use>
                 </svg>
             `;
