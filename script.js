@@ -11,9 +11,26 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 6, name: "Splash Gordon", odds: 9, fillColor: "#DA70D6" /* Orchid */ }
     ];
 
+    // Race layout constants
     const FINISH_LINE_OFFSET = 100; // pixels from edge for finish line
-    const RACE_LENGTH = 2000; // Total race length in pixels (twice as long)
+    const RACE_LENGTH = 2000; // Total race length in pixels
     const VIEWPORT_WIDTH = 1000; // Approximate viewport width
+
+    // Race mechanics constants
+    const RACE_START_DELAY = 3500; // Milliseconds to wait after sound before race starts
+    const WINNER_SELECTION_RANDOMNESS = 0.15; // 15% random factor in winner selection
+    const COMEBACK_CHANCE_EARLY = 0.05; // 5% chance of comeback in first half
+    const COMEBACK_CHANCE_LATE = 0.15; // 15% chance of comeback in second half
+    const SLOWDOWN_CHANCE_LOW = 0.03; // 3% base slowdown chance
+    const SLOWDOWN_CHANCE_HIGH = 0.12; // 12% slowdown chance for early leaders
+    const BURST_SPEED_CHANCE = 0.08; // 8% chance of speed burst
+    const SPLASH_CREATION_CHANCE = 0.3; // 30% chance to create splash on fast movement
+    const ANNOUNCEMENT_INTERVAL = 2000; // Milliseconds between announcements
+
+    // Visual effect constants
+    const NUM_WATER_SPLASHES = 15; // Number of background water splashes
+    const NUM_WHITE_CAPS = 25; // Number of white caps on water
+    const DUCK_Y_OFFSET_MAX = 10; // Maximum vertical bobbing offset in pixels
 
     // --- SOUNDS ---
     // Real audio objects for race sounds
@@ -130,8 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let raceInProgress = false;
     let animationFrameId;
-    let ducks = []; 
+    let ducks = [];
     let logicalFinishLinePosition;
+    let waterEffectsContainer = null; // Reusable container for water effects
 
     // --- CORE FUNCTIONS ---
 
@@ -189,54 +207,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /**
+     * Creates or reuses water splash and whitecap effects
+     * Optimization: Reuses container across races instead of recreating DOM elements
+     */
     function createWaterSplashes() {
-        // Create random water splashes
-        const numSplashes = 15;
+        // Reuse existing container if available
+        if (waterEffectsContainer) {
+            return waterEffectsContainer;
+        }
+
+        // Create new container only on first race
         const splashesContainer = document.createElement('div');
         splashesContainer.id = 'splashes-container';
-        
-        for (let i = 0; i < numSplashes; i++) {
+
+        // Create random water splashes
+        for (let i = 0; i < NUM_WATER_SPLASHES; i++) {
             const splash = document.createElement('div');
             splash.className = 'water-splash';
-            
+
             // Random position
-            const xPos = Math.random() * 2800; // Spread across race area
-            const yPos = 40 + Math.random() * 400; // Keep within water area
-            
+            const xPos = Math.random() * 2800;
+            const yPos = 40 + Math.random() * 400;
+
             // Random animation delay
             const delay = Math.random() * 10;
-            
+
             splash.style.left = `${xPos}px`;
             splash.style.top = `${yPos}px`;
             splash.style.animationDelay = `${delay}s`;
-            
+
             splashesContainer.appendChild(splash);
         }
-        
+
         // Add white caps
-        const numCaps = 25;
-        for (let i = 0; i < numCaps; i++) {
+        for (let i = 0; i < NUM_WHITE_CAPS; i++) {
             const cap = document.createElement('div');
             cap.className = 'white-cap';
-            
+
             // Random position
-            const xPos = Math.random() * 2800; // Spread across race area
-            const yPos = 50 + Math.random() * 380; // Keep within water area
-            
+            const xPos = Math.random() * 2800;
+            const yPos = 50 + Math.random() * 380;
+
             // Random size
             const width = 15 + Math.random() * 25;
-            
+
             // Random animation delay
             const delay = Math.random() * 5;
-            
+
             cap.style.left = `${xPos}px`;
             cap.style.top = `${yPos}px`;
             cap.style.width = `${width}px`;
             cap.style.animationDelay = `${delay}s`;
-            
+
             splashesContainer.appendChild(cap);
         }
-        
+
+        // Cache for reuse
+        waterEffectsContainer = splashesContainer;
         return splashesContainer;
     }
 
@@ -284,11 +312,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if(oldWinner) oldWinner.classList.remove('winner-highlight');
     }
 
+    /**
+     * Selects the race winner based on betting odds with some randomness
+     *
+     * Each duck has odds (e.g., 2:1, 5:1) that determine their probability of winning:
+     * - 2:1 odds = 33% chance to win (1/(2+1))
+     * - 5:1 odds = 17% chance to win (1/(5+1))
+     *
+     * A small random factor (15%) is added to prevent races from being too predictable
+     * while still respecting the odds over multiple races.
+     *
+     * @returns {Object} The duck object that should win this race
+     */
     function selectWinner() {
-        // Add a small random factor to make races less predictable
-        const randomFactor = 0.15; // 15% randomness
-        
-        // Calculate adjusted probabilities with randomness
+        const randomFactor = WINNER_SELECTION_RANDOMNESS;
+
+        // Apply random adjustment to each duck's probability
         const adjustedDucks = ducks.map(duck => {
             const randomAdjustment = 1 + (Math.random() * randomFactor * 2 - randomFactor);
             return {
@@ -296,16 +335,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 adjustedProbability: duck.probability * randomAdjustment
             };
         });
-        
-        // Use adjusted probabilities for selection
+
+        // Use weighted random selection based on adjusted probabilities
         const sumOfProbabilities = adjustedDucks.reduce((sum, duck) => sum + duck.adjustedProbability, 0);
         let random = Math.random() * sumOfProbabilities;
-        
+
         for (let duck of adjustedDucks) {
             if (random < duck.adjustedProbability) return ducks.find(d => d.id === duck.id);
             random -= duck.adjustedProbability;
         }
-        
+
+        // Fallback (should rarely happen)
         return ducks[ducks.length - 1];
     }
 
@@ -320,8 +360,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let lastAnnounceTime = 0;
-    let announceInterval = 2000; 
+    let announceInterval = ANNOUNCEMENT_INTERVAL; 
 
+    /**
+     * Main race animation loop - called every frame via requestAnimationFrame
+     *
+     * This function implements a predetermined-outcome race where:
+     * 1. A winner is selected before the race starts based on betting odds
+     * 2. All ducks move with realistic randomness to create suspense
+     * 3. The predetermined winner gets subtle advantages to ensure they win
+     * 4. The race looks natural and unpredictable to observers
+     *
+     * @param {number} timestamp - Current timestamp from requestAnimationFrame
+     * @param {Object} actualWinner - The duck object that should win this race
+     */
     function animateRace(timestamp, actualWinner) {
         if (!raceInProgress) return;
 
@@ -336,44 +388,47 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (duck.currentPosition < logicalFinishLinePosition + 20 || duck.id === actualWinner.id) {
-                // Base movement with more randomness
+                // Base movement with randomness (0.2 to 3.7 pixels per frame)
                 let movement = (Math.random() * 3.5 + 0.2);
-                
-                // Race progress percentage
+
+                // Calculate how far through the race this duck is (0.0 to 1.0)
                 const raceProgress = duck.currentPosition / logicalFinishLinePosition;
                 
                 // Dramatic comeback chances increase in the second half of the race
-                const comebackChance = raceProgress > 0.5 ? 0.15 : 0.05;
-                
+                const comebackChance = raceProgress > 0.5 ? COMEBACK_CHANCE_LATE : COMEBACK_CHANCE_EARLY;
+
                 // Dramatic slowdown chances are higher for early leaders
-                const slowdownChance = raceProgress > 0.6 && duck.currentPosition > logicalFinishLinePosition * 0.25 ? 0.12 : 0.03;
+                const slowdownChance = raceProgress > 0.6 && duck.currentPosition > logicalFinishLinePosition * 0.25 ? SLOWDOWN_CHANCE_HIGH : SLOWDOWN_CHANCE_LOW;
                 
-                // Winner gets a more significant advantage as the race progresses
+                // WINNER ADVANTAGE SYSTEM
+                // The predetermined winner gets speed advantages that scale with race progress
+                // This creates a natural-looking win without being obvious
                 if (duck.id === actualWinner.id) {
-                    // Winner advantage varies throughout the race
                     if (raceProgress < 0.3) {
-                        // Early race: winner might not lead
+                        // Early race (0-30%): Minimal advantage - winner might not even lead
+                        // This creates suspense and makes the race feel unpredictable
                         movement += (Math.random() * 0.3);
                     } else if (raceProgress > 0.7) {
-                        // Final stretch: winner gets more advantage
+                        // Final stretch (70-100%): Significant advantage to ensure victory
                         movement += (0.5 + Math.random() * 0.8);
-                        
-                        // Extra boost if other ducks are getting close to finish
-                        const otherDucksNearFinish = ducks.some(d => 
-                            d.id !== actualWinner.id && 
+
+                        // Safety mechanism: If other ducks are dangerously close to finish,
+                        // give winner extra boost to prevent upset
+                        const otherDucksNearFinish = ducks.some(d =>
+                            d.id !== actualWinner.id &&
                             d.currentPosition > logicalFinishLinePosition - 50);
-                            
+
                         if (otherDucksNearFinish) {
                             movement += 1.5;
                         }
                     } else {
-                        // Middle race: moderate advantage
+                        // Middle race (30-70%): Moderate advantage
                         movement += (0.2 + Math.random() * 0.6);
                     }
                 }
                 
                 // Random bursts of speed for any duck
-                if (Math.random() < 0.08) {
+                if (Math.random() < BURST_SPEED_CHANCE) {
                     movement += Math.random() * 3;
                     if (Math.random() < 0.3) playSound(SOUNDS.quack);
                 }
@@ -394,13 +449,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 duck.currentPosition += movement;
                 
                 // Create splash effect on significant movement
-                if (movement > 3 && Math.random() < 0.3) {
+                if (movement > 3 && Math.random() < SPLASH_CREATION_CHANCE) {
                     createDuckSplash(duck);
                 }
             }
             
-            duck.currentYOffset += (Math.random() - 0.5) * 2; 
-            duck.currentYOffset = Math.max(-10, Math.min(10, duck.currentYOffset)); 
+            duck.currentYOffset += (Math.random() - 0.5) * 2;
+            duck.currentYOffset = Math.max(-DUCK_Y_OFFSET_MAX, Math.min(DUCK_Y_OFFSET_MAX, duck.currentYOffset)); 
 
             // Always use the actual position for the duck's left value
             duck.elementContainer.style.left = `${duck.currentPosition}px`;
@@ -440,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (timestamp - lastAnnounceTime > announceInterval) {
-            const sortedDucks = [...ducks].sort((a, b) => b.currentPosition - a.currentPosition);
+            // Reuse sortedDucks from line 410 instead of recalculating
             const leadingDuck = sortedDucks[0];
             let subs = { leadingDuck: leadingDuck.name };
             let stage = 'midRace';
@@ -507,12 +562,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (actualWinner.currentPosition >= logicalFinishLinePosition) {
                 endRace(actualWinner);
             } 
-            // If other ducks crossed but not the winner, slow them down at the finish line
+            // If other ducks crossed but not the winner, smoothly stop them at the finish line
             else {
                 finishedDucks.forEach(duck => {
-                    // Pull back ducks that crossed too early
-                    duck.currentPosition = logicalFinishLinePosition - 5;
-                    duck.elementContainer.style.left = `${duck.currentPosition}px`;
+                    if (duck.id !== actualWinner.id) {
+                        // Smoothly cap position at finish line without jarring pull-back
+                        duck.currentPosition = Math.min(duck.currentPosition, logicalFinishLinePosition - 2);
+                        duck.elementContainer.style.left = `${duck.currentPosition}px`;
+                    }
                 });
                 animationFrameId = requestAnimationFrame((ts) => animateRace(ts, actualWinner));
             }
@@ -547,22 +604,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function endRace(winner) {
-        winner.currentPosition = logicalFinishLinePosition + 5; 
+        winner.currentPosition = logicalFinishLinePosition + 5;
         winner.elementContainer.style.left = `${winner.currentPosition}px`;
-        
-        // Remove all animation classes and add winner highlight
+
+        // Remove all animation classes and add winner highlight with celebration effects
         winner.elementContainer.classList.remove('front-runner', 'close-behind', 'middle-pack', 'struggling');
         winner.elementContainer.classList.add('winner-highlight');
-        
-        // Add a victory animation
+
+        // Enhanced victory animation - more dramatic bobbing
         winner.elementContainer.style.animation = 'none';
         setTimeout(() => {
-            winner.elementContainer.style.animation = 'frontRunnerBobbing 0.6s ease-in-out infinite alternate';
+            winner.elementContainer.style.animation = 'frontRunnerBobbing 0.4s ease-in-out infinite alternate';
         }, 50);
-        
-        announcer.innerHTML = getRandomAnnouncerLine('winner', { winnerName: winner.name });
+
+        // Display winner announcement with emphasis
+        const winnerMessage = getRandomAnnouncerLine('winner', { winnerName: winner.name });
+        announcer.innerHTML = winnerMessage;
+        announcer.style.fontSize = '2em'; // Make winner announcement bigger
+        announcer.style.fontWeight = 'bold';
+
+        // Play celebration sound
         playSound(SOUNDS.cheer);
-        
+
+        // Reset announcer style after a moment
+        setTimeout(() => {
+            announcer.style.fontSize = '';
+            announcer.style.fontWeight = '';
+        }, 3000);
+
         raceInProgress = false;
         startButton.style.display = 'none';
         nextRaceButton.style.display = 'inline-block';
@@ -606,14 +675,26 @@ document.addEventListener('DOMContentLoaded', () => {
         playSound(SOUNDS.start);
 
         const winner = selectWinner();
-        // console.log("The pre-determined winner is: ", winner.name); 
+        // console.log("The pre-determined winner is: ", winner.name);
         // console.log("Target Finish X:", logicalFinishLinePosition);
 
-        // Wait 3.5 seconds after sound starts before beginning the race
+        // Show countdown timer during delay
+        let countdown = 3;
+        const countdownInterval = setInterval(() => {
+            if (countdown > 0) {
+                announcer.textContent = `${countdown}...`;
+                countdown--;
+            } else {
+                announcer.textContent = "GO!";
+                clearInterval(countdownInterval);
+            }
+        }, 1000);
+
+        // Wait for delay after sound starts before beginning the race
         setTimeout(() => {
-            lastAnnounceTime = performance.now(); 
+            lastAnnounceTime = performance.now();
             animationFrameId = requestAnimationFrame((ts) => animateRace(ts, winner));
-        }, 3500); 
+        }, RACE_START_DELAY); 
     });
 
     nextRaceButton.addEventListener('click', () => {
